@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - AI Resume Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="container" style="max-width: 600px;">
+    <div style="margin-bottom: 2rem;">
+      <h1 style="font-size: 2rem; font-weight: 800;">Candidate Profile</h1>
+      <p style="color: #64748b; font-size: 0.9rem;">Manage user account credentials and system settings</p>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="logo-icon" id="user-avatar" style="width: 56px; height: 56px; font-size: 1.5rem; border-radius: 50%;">U</div>
+        <div>
+          <h2 id="user-name" style="font-size: 1.3rem; font-weight: 800;">Candidate Name</h2>
+          <p id="user-email" style="color: #64748b; font-size: 0.85rem;">candidate@example.com</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Status</strong>
+          <div style="font-size: 1rem; font-weight: 700; color: #15803d; margin-top: 0.2rem;">Active Account</div>
+        </div>
+        <div style="padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Role</strong>
+          <div style="font-size: 1rem; font-weight: 700; color: #1d4ed8; margin-top: 0.2rem;">Software Engineer</div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Change Password</h3>
+      <form id="change-pass-form">
+        <div style="margin-bottom: 1rem;">
+          <input type="password" id="curr-pass" required placeholder="Current Password" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+        </div>
+        <div style="margin-bottom: 1.25rem;">
+          <input type="password" id="new-pass" required placeholder="New Password" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+        </div>
+        <button type="submit" class="btn-btn btn-primary" style="padding: 0.75rem 1.5rem;">Update Password</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 AI Resume Analyzer & Job Matcher. Python, Java, JS, HTML & CSS.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    checkAuthProtection();
+    document.addEventListener('DOMContentLoaded', () => {
+      const userJson = localStorage.getItem('user');
+      if (userJson) {
+        const u = JSON.parse(userJson);
+        document.getElementById('user-name').textContent = u.name;
+        document.getElementById('user-email').textContent = u.email;
+        document.getElementById('user-avatar').textContent = u.name ? u.name.charAt(0).toUpperCase() : 'U';
+      }
+    });
+
+    document.getElementById('change-pass-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const current_password = document.getElementById('curr-pass').value;
+      const new_password = document.getElementById('new-pass').value;
+      try {
+        await apiRequest('/auth/change-password', 'POST', { current_password, new_password });
+        alert("Password updated successfully");
+        document.getElementById('curr-pass').value = '';
+        document.getElementById('new-pass').value = '';
+      } catch (err) {
+        alert(err.message || "Password update failed");
+      }
+    });
+  </script>
+</body>
+</html>

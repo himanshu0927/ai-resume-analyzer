@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - AI Resume Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="background-color: #0f172a;">
+  <div id="navbar-container"></div>
+
+  <main class="container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
+    <div className="card" style="width: 100%; max-width: 420px; background: #1e293b; border-color: #334155; color: #fff; padding: 2.5rem; border-radius: 16px;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div className="logo-icon" style="margin: 0 auto 1rem auto; width: 44px; height: 44px; font-size: 1.2rem;">AI</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700;">Create Account</h2>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.3rem;">Start analyzing resumes and matching target job roles</p>
+      </div>
+
+      <div id="error-alert" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.5rem;"></div>
+
+      <form id="register-form">
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; margin-bottom: 0.5rem;">Full Name</label>
+          <input type="text" id="name" required placeholder="Alex Morgan" style="width: 100%; padding: 0.8rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.9rem; outline: none;">
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; margin-bottom: 0.5rem;">Email Address</label>
+          <input type="email" id="email" required placeholder="candidate@example.com" style="width: 100%; padding: 0.8rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.9rem; outline: none;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; margin-bottom: 0.5rem;">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" style="width: 100%; padding: 0.8rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 0.9rem; outline: none;">
+        </div>
+
+        <button type="submit" class="btn-btn btn-primary" style="width: 100%; justify-content: center; padding: 0.8rem; font-size: 1rem;">Register Account</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #94a3b8;">
+        Already have an account? <a href="login.html" style="color: #60a5fa; font-weight: 600; text-decoration: none;">Sign in</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errAlert = document.getElementById('error-alert');
+
+      errAlert.style.display = 'none';
+
+      try {
+        const res = await apiRequest('/auth/register', 'POST', { name, email, password });
+        localStorage.setItem('token', res.access_token);
+        localStorage.setItem('user', JSON.stringify(res.user));
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        errAlert.textContent = err.message || 'Registration failed.';
+        errAlert.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

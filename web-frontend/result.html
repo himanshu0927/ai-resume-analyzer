@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Result - AI Resume Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">Resume Analysis Results</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Comprehensive score factors and extracted skills breakdown</p>
+      </div>
+      <button id="download-pdf-btn" class="btn-btn btn-primary" onclick="downloadPDF()">Download PDF Report</button>
+    </div>
+
+    <!-- Score Circle & Factor Table -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+      <div class="card" style="text-align: center;">
+        <h3 class="card-title" style="justify-content: center;">Resume Analysis Score</h3>
+        <div class="score-circle" id="score-ring" style="--score: 82.5;">
+          <div class="score-val" id="score-text">82.5<br><span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">OUT OF 100</span></div>
+        </div>
+        <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4;">Note: This score is an analytical rating based on structure and skills depth for self-improvement.</p>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Score Factor Breakdown</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>Factor</th><th>Weight</th><th>Score</th><th>Status</th></tr>
+          </thead>
+          <tbody id="factors-tbody">
+            <tr><td>Technical Skills Depth</td><td>25%</td><td>85.0/100</td><td><span class="tag-badge tag-success">Good</span></td></tr>
+            <tr><td>Practical Projects</td><td>20%</td><td>85.0/100</td><td><span class="tag-badge tag-success">Good</span></td></tr>
+            <tr><td>Work Experience</td><td>20%</td><td>80.0/100</td><td><span class="tag-badge tag-success">Good</span></td></tr>
+            <tr><td>Academic Background</td><td>15%</td><td>90.0/100</td><td><span class="tag-badge tag-success">Good</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Skills Categorization -->
+    <div class="card">
+      <h3 class="card-title">Categorized Technical & Soft Skills</h3>
+      <div id="categorized-skills-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="padding: 0.8rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <strong style="font-size: 0.8rem; color: #64748b; text-transform: uppercase;">Programming Languages</strong>
+          <div style="margin-top: 0.4rem;"><span class="tag-badge tag-blue">Python</span><span class="tag-badge tag-blue">Java</span><span class="tag-badge tag-blue">JavaScript</span></div>
+        </div>
+        <div style="padding: 0.8rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <strong style="font-size: 0.8rem; color: #64748b; text-transform: uppercase;">Web Development</strong>
+          <div style="margin-top: 0.4rem;"><span class="tag-badge tag-blue">React</span><span class="tag-badge tag-blue">HTML</span><span class="tag-badge tag-blue">CSS</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 AI Resume Analyzer & Job Matcher. Python, Java, JS, HTML & CSS.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    checkAuthProtection();
+    const urlParams = new URLSearchParams(window.location.search);
+    const resumeId = urlParams.get('id');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!resumeId) return;
+      try {
+        const analysis = await apiRequest(`/resumes/${resumeId}/analysis`);
+        document.getElementById('score-ring').style.setProperty('--score', analysis.overall_score);
+        document.getElementById('score-text').innerHTML = `${analysis.overall_score}<br><span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">OUT OF 100</span>`;
+
+        if (analysis.score_factors) {
+          const rows = analysis.score_factors.map(f => `
+            <tr>
+              <td>${f.factor}</td>
+              <td>${f.weight}</td>
+              <td><strong>${f.score} / 100</strong></td>
+              <td><span class="tag-badge ${f.score >= 70 ? 'tag-success' : 'tag-warning'}">${f.status}</span></td>
+            </tr>
+          `).join('');
+          document.getElementById('factors-tbody').innerHTML = rows;
+        }
+
+        if (analysis.raw_extracted_data && analysis.raw_extracted_data.categorized_skills) {
+          const cats = analysis.raw_extracted_data.categorized_skills;
+          let html = '';
+          for (const [cat, list] of Object.entries(cats)) {
+            if (list.length > 0) {
+              html += `
+                <div style="padding: 0.8rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  <strong style="font-size: 0.8rem; color: #64748b; text-transform: uppercase;">${cat}</strong>
+                  <div style="margin-top: 0.4rem;">${list.map(s => `<span class="tag-badge tag-blue">${s}</span>`).join('')}</div>
+                </div>
+              `;
+            }
+          }
+          document.getElementById('categorized-skills-container').innerHTML = html;
+        }
+      } catch (err) {
+        console.error("Result load error", err);
+      }
+    });
+
+    async function downloadPDF() {
+      if (!resumeId) return;
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://127.0.0.1:8000/api/reports/${resumeId}/pdf`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Resume_Analysis_Report_${resumeId}.pdf`;
+        a.click();
+      } catch (e) {
+        alert("Failed downloading PDF report");
+      }
+    }
+  </script>
+</body>
+</html>

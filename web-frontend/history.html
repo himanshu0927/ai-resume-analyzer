@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Analyses - AI Resume Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800;">My Resume Analyses</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Historical records of parsed documents, score reports, and PDF downloads</p>
+      </div>
+      <a href="analyzer.html" class="btn-btn btn-primary">Analyze New Resume</a>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="data-table">
+        <thead>
+          <tr><th>Resume Name</th><th>Upload Date</th><th>Analysis Score</th><th style="text-align: right;">Actions</th></tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">Loading analyses history...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 AI Resume Analyzer & Job Matcher. Python, Java, JS, HTML & CSS.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    checkAuthProtection();
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const resumes = await apiRequest('/resumes');
+        const tbody = document.getElementById('history-tbody');
+        if (resumes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">No resumes uploaded yet.</td></tr>';
+          return;
+        }
+
+        const rows = resumes.map(r => `
+          <tr>
+            <td><strong>${r.filename}</strong></td>
+            <td style="color: #64748b; font-size: 0.85rem;">${r.uploaded_at}</td>
+            <td><span class="tag-badge tag-success">82.5 / 100</span></td>
+            <td style="text-align: right;">
+              <a href="result.html?id=${r.id}" class="btn-btn btn-outline" style="color: #2563eb; border-color: #bfdbfe; padding: 0.4rem 0.8rem; font-size: 0.8rem;">View</a>
+              <button onclick="deleteResume(${r.id})" class="btn-btn btn-outline" style="color: #ef4444; border-color: #fca5a5; padding: 0.4rem 0.8rem; font-size: 0.8rem;">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+        tbody.innerHTML = rows;
+      } catch (e) {}
+    });
+
+    async function deleteResume(id) {
+      if (!confirm("Are you sure you want to delete this resume analysis record?")) return;
+      try {
+        await apiRequest(`/resumes/${id}`, 'DELETE');
+        window.location.reload();
+      } catch (e) {
+        alert("Failed to delete record");
+      }
+    }
+  </script>
+</body>
+</html>

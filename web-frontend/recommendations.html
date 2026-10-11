@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recommendations - AI Resume Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="container">
+    <div style="margin-bottom: 2rem;">
+      <h1 style="font-size: 2rem; font-weight: 800;">Target Job Role Recommendations</h1>
+      <p style="color: #64748b; font-size: 0.9rem;">Suggested target roles based on detected candidate technical skills</p>
+    </div>
+
+    <div id="recs-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;"></div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 AI Resume Analyzer & Job Matcher. Python, Java, JS, HTML & CSS.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    checkAuthProtection();
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const recs = await apiRequest('/recommendations');
+        const grid = document.getElementById('recs-grid');
+        grid.innerHTML = recs.map((r, i) => `
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 800;">${r.role}</h3>
+              <span class="tag-badge tag-success" style="font-size: 0.8rem;">${r.match_percentage}% Suitability</span>
+            </div>
+            <div style="padding: 0.8rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.85rem; color: #334155; margin-bottom: 1rem;">
+              <strong>Rationale:</strong> ${r.reason}
+            </div>
+            <div>
+              <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 0.4rem;">Key Matching Skills</strong>
+              ${r.key_matching_skills.map(s => `<span class="tag-badge tag-blue">${s}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>

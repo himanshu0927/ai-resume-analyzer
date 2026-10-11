@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Matcher - AI Resume Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="container" style="max-width: 850px;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h1 style="font-size: 2rem; font-weight: 800;">Job Description Matcher</h1>
+      <p style="color: #64748b; font-size: 0.95rem; margin-top: 0.5rem;">Compare your resume against any job posting to calculate match rating, matching skills, and missing requirements.</p>
+    </div>
+
+    <div class="card">
+      <form id="matcher-form">
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem;">Target Job Title</label>
+          <input type="text" id="job-title" required placeholder="e.g. Full Stack Engineer (Python, Java, React)" style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem;">Job Description</label>
+          <textarea id="job-desc" rows="6" required placeholder="Paste the target job description here..." style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-btn btn-primary" style="width: 100%; justify-content: center; padding: 0.8rem; font-size: 1rem;">Compare & Match Job</button>
+      </form>
+    </div>
+
+    <!-- Match Output Card -->
+    <div id="match-result-card" class="card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <span class="tag-badge tag-blue" style="font-size: 0.75rem;">Match Rating Analysis</span>
+          <h2 id="res-job-title" style="font-size: 1.4rem; font-weight: 800; margin-top: 0.3rem;">Senior Software Engineer</h2>
+        </div>
+        <div style="text-align: right;">
+          <div id="res-score" style="font-size: 2.2rem; font-weight: 800; color: #2563eb;">82.5%</div>
+          <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">SIMILARITY MATCH</span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div>
+          <h4 style="font-size: 0.9rem; font-weight: 700; color: #15803d; margin-bottom: 0.5rem;">✅ Matching Skills</h4>
+          <div id="matching-skills-container"></div>
+        </div>
+        <div>
+          <h4 style="font-size: 0.9rem; font-weight: 700; color: #b91c1c; margin-bottom: 0.5rem;">❌ Missing Skills</h4>
+          <div id="missing-skills-container"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 AI Resume Analyzer & Job Matcher. Python, Java, JS, HTML & CSS.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    checkAuthProtection();
+
+    document.getElementById('matcher-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const job_title = document.getElementById('job-title').value;
+      const job_description = document.getElementById('job-desc').value;
+
+      try {
+        const res = await apiRequest('/job-match', 'POST', { job_title, job_description });
+        document.getElementById('res-job-title').textContent = res.job_title;
+        document.getElementById('res-score').textContent = `${res.match_score}%`;
+
+        document.getElementById('matching-skills-container').innerHTML = res.matching_skills.map(s => `<span class="tag-badge tag-success">${s}</span>`).join('') || '<span style="font-size: 0.85rem; color: #94a3b8;">None</span>';
+        document.getElementById('missing-skills-container').innerHTML = res.missing_skills.map(s => `<span class="tag-badge tag-danger">${s}</span>`).join('') || '<span style="font-size: 0.85rem; color: #94a3b8;">None</span>';
+
+        document.getElementById('match-result-card').style.display = 'block';
+      } catch (err) {
+        alert(err.message || 'Job match failed');
+      }
+    });
+  </script>
+</body>
+</html>
