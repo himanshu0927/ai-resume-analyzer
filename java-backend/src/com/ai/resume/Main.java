@@ -1,9 +1,8 @@
 package com.ai.resume;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -15,8 +14,8 @@ import java.security.MessageDigest;
 import java.util.*;
 
 public class Main {
-    private static final int PORT = 8000;
-    private static final String PYTHON_AI_URL = "http://127.0.0.1:8001";
+    private static final int PORT = Integer.parseInt(System.getenv().getOrDefault("PORT", "8000"));
+    private static final String PYTHON_AI_URL = System.getenv().getOrDefault("PYTHON_AI_URL", "http://127.0.0.1:8001");
 
     // In-memory Database for Users, Resumes, Analyses, JobMatches
     private static final Map<String, Map<String, String>> users = new HashMap<>(); // email -> userMap
